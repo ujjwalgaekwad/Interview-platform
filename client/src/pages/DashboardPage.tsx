@@ -2,7 +2,7 @@ import Container from "@/components/general/Container";
 import DataVisualization from "@/components/general/DataVisualization";
 import StreakTracker from "@/components/dashboard/StreakTracker";
 import SessionInfoForm from "@/components/interview/SessionInfoForm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InterviewSessionData, JobRoleType } from "@/types/InterviewData";
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import axios, { AxiosError } from "axios";
 import useProfileStore from "@/store/profileStore";
 import { formatTimeInShortWords, getDateAndDay } from "@/utils/formatTime";
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 
 const roles = [
   {
@@ -107,123 +107,146 @@ function DashboardPage() {
     return "Good Night";
   };
 
+  const totalSessions = interviewSessions?.length ?? 0;
+  const totalQuestions = interviewSessions?.reduce((count, session) => count + session.questions.length, 0) ?? 0;
+
   if (isPending) {
-    return <div className="h-full w-screen overflow-x-hidden py-12">
-      <div className="w-1/2 mx-auto my-2 py-2 rounded-xl bg-gradient-to-r to-blue-700 from-purple-800 dark:to-blue-700 dark:from-purple-800 flex justify-center items-center">
-        <p className="text-zinc-300 dark:text-zinc-300 font-semibold">Loading...</p>
-      </div>
-    </div>
+    return (
+      <Container className="page-section py-10">
+        <Card className="mx-auto max-w-2xl">
+          <CardContent className="flex items-center justify-center gap-3 p-10 text-muted-foreground">
+            <LoaderText />
+            <p className="font-medium">Loading dashboard...</p>
+          </CardContent>
+        </Card>
+      </Container>
+    )
   }
 
   return (
-    <div className="h-full w-screen overflow-x-hidden select-none py-12 space-y-6">
-      <div className="w-1/2 mx-auto my-2 py-2 rounded-xl bg-gradient-to-r to-blue-700 from-purple-800 flex justify-center items-center">
-        <p className="text-zinc-300 font-semibold">{getGreeting()} {user?.firstName}, Welcome Back to your Dashboard</p>
-      </div>
-      <Container>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+    <div className="page-section overflow-x-hidden select-none py-10">
+      <Container className="space-y-10">
+        <Card className="overflow-hidden">
+          <div className="bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.12),transparent_25%),linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,250,252,0.9))] dark:bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.22),transparent_25%),linear-gradient(180deg,rgba(15,23,42,0.96),rgba(15,23,42,0.86))]">
+            <CardContent className="flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
+              <div className="space-y-3">
+                <span className="section-kicker">Dashboard</span>
+                <h1 className="section-heading font-display font-bold text-foreground">{getGreeting()} {user?.firstName}, welcome back.</h1>
+                <p className="max-w-2xl text-sm leading-7 text-muted-foreground">
+                  Continue a session, launch a new role-based interview, or review your latest signal from the same clean workspace.
+                </p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[26rem]">
+                {[
+                  { label: "Sessions", value: totalSessions },
+                  { label: "Questions", value: totalQuestions },
+                  { label: "Roles", value: roles.length },
+                ].map((metric) => (
+                  <div key={metric.label} className="rounded-2xl border border-border/70 bg-background/75 p-4 text-left">
+                    <p className="text-2xl font-display font-semibold text-foreground">{metric.value}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">{metric.label}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </div>
+        </Card>
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {roles.map((role, index) => (
-            <SessionInfoForm
-              key={index}
-              skills={role.skills}
-              jobRole={role.jobRole}
-            >
-              <Card
-                className="dark:bg-zinc-800 dark:text-neutral-300 p-6 cursor-pointer transition duration-300 shadow-md hover:scale-[103%] hover:shadow-lg bg-white hover:bg-neutral-100 dark:hover:bg-zinc-700/70"
-              >
-                <CardHeader className="py-1 px-0">
-                  <CardTitle className="text-2xl font-medium">{role.title}</CardTitle>
+            <SessionInfoForm key={index} skills={role.skills} jobRole={role.jobRole}>
+              <Card className="h-full cursor-pointer overflow-hidden">
+                <CardHeader className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-border/70 bg-background/75 text-primary">
+                      <Plus size={20} />
+                    </div>
+                    <span className="rounded-full border border-border/70 bg-muted/60 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Role
+                    </span>
+                  </div>
+                  <CardTitle>{role.title}</CardTitle>
+                  <CardDescription className="text-sm leading-7 text-muted-foreground">{role.description}</CardDescription>
                 </CardHeader>
-                <CardContent className="p-0">
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">{role.description}</p>
-                </CardContent>
               </Card>
             </SessionInfoForm>
           ))}
+
           <SessionInfoForm>
-            <Card
-              className="dark:bg-zinc-800 dark:text-neutral-300 py-10 flex items-center justify-center cursor-pointer transition duration-300 hover:scale-[103%] shadow-md hover:shadow-lg hover:bg-neutral-100 dark:hover:bg-zinc-700/70"
-            >
-              <CardContent className="flex p-0 items-center justify-center h-full">
-                <Plus size={32} className="text-neutral-300" />
+            <Card className="flex min-h-full cursor-pointer items-center justify-center border-dashed">
+              <CardContent className="flex flex-col items-center justify-center gap-3 p-8 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-dashed border-border/80 bg-muted/40 text-muted-foreground">
+                  <Plus size={28} />
+                </div>
+                <div>
+                  <p className="font-display text-lg font-semibold text-foreground">Create custom session</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Add a role, choose skills, and start a practice run.</p>
+                </div>
               </CardContent>
             </Card>
           </SessionInfoForm>
         </div>
 
-        <h1 className="text-3xl font-bold mb-4 mt-16 rounded-xl py-1 h-15 w-fit text-left transition duration-300">
-          Interview Sessions
-        </h1>
-        <div className="overflow-x-auto rounded-lg border">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-            <thead className="bg-zinc-100 dark:bg-zinc-900">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  Job Role
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  Skills
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  Candidate
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  Duration
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  Experience
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  Questions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-zinc-200/70 dark:bg-zinc-800/70 divide-y divide-gray-200 dark:divide-gray-800">
-              {interviewSessions && interviewSessions.sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime()).map((item) => (
-                <tr onClick={() => navigate(`/interview/sessions/${item._id}`)} key={item._id} className="hover:bg-gray-100/80 dark:hover:bg-zinc-900">
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                    {item.jobRole}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                    {item.skills.join(', ')}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                    {item.candidate}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                    {formatTimeInShortWords(item.endTime - item.startTime)}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                    {getDateAndDay(item.endTime)}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                    {item.yearsOfExperience} years
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                    {item.questions.length} questions
-                  </td>
+        <Card className="surface-panel overflow-hidden">
+          <CardHeader className="border-b border-border/60 bg-muted/30">
+            <CardTitle className="text-2xl">Interview Sessions</CardTitle>
+          </CardHeader>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-border/60">
+              <thead className="bg-muted/50">
+                <tr>
+                  {tableHeaders.map((header) => (
+                    <th key={header} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      {header}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <h1 className="text-3xl font-bold mb-4 mt-16 rounded-xl py-1 h-15 w-fit text-left transition duration-300">
-          Daily stats
-        </h1>
-        <div className="flex justify-between">
-          {interviewSessions && <DataVisualization analysis={interviewSessions} />}
-          {(interviewSessions && interviewSessions.length) ? <StreakTracker interviewSessions={interviewSessions} /> : <div className="space-y-2 pt-4">
-            <div className="w-7/12 max-w-sm mx-auto p-4 text-center bg-zinc-200/80 dark:bg-zinc-800 ml-2"></div>
+              </thead>
+              <tbody className="divide-y divide-border/60 bg-background/50">
+                {interviewSessions && interviewSessions
+                  .sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())
+                  .map((item) => (
+                    <tr
+                      onClick={() => navigate(`/interview/sessions/${item._id}`)}
+                      key={item._id}
+                      className="cursor-pointer transition-colors hover:bg-accent/50"
+                    >
+                      <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-foreground">{item.jobRole}</td>
+                      <td className="whitespace-nowrap px-4 py-4 text-sm text-muted-foreground">{item.skills.join(", ")}</td>
+                      <td className="whitespace-nowrap px-4 py-4 text-sm text-muted-foreground">{item.candidate}</td>
+                      <td className="whitespace-nowrap px-4 py-4 text-sm text-muted-foreground">{formatTimeInShortWords(item.endTime - item.startTime)}</td>
+                      <td className="whitespace-nowrap px-4 py-4 text-sm text-muted-foreground">{getDateAndDay(item.endTime)}</td>
+                      <td className="whitespace-nowrap px-4 py-4 text-sm text-muted-foreground">{item.yearsOfExperience} years</td>
+                      <td className="whitespace-nowrap px-4 py-4 text-sm text-muted-foreground">{item.questions.length} questions</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
           </div>
-          }
+        </Card>
+
+        <div className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
+          {interviewSessions && <DataVisualization analysis={interviewSessions} />}
+          {interviewSessions && interviewSessions.length ? (
+            <StreakTracker interviewSessions={interviewSessions} />
+          ) : (
+            <Card className="flex items-center justify-center p-8">
+              <CardContent className="p-0 text-center text-muted-foreground">
+                Start a few sessions to unlock your streak and chart insights.
+              </CardContent>
+            </Card>
+          )}
         </div>
       </Container>
     </div>
   );
+}
+
+const tableHeaders = ["Job Role", "Skills", "Candidate", "Duration", "Date", "Experience", "Questions"];
+
+function LoaderText() {
+  return <Loader2 className="h-5 w-5 animate-spin text-primary" />;
 }
 
 export default DashboardPage;

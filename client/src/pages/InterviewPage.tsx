@@ -20,6 +20,7 @@ import Avatar3D from "@/components/general/Avatar3D"
 import Avatar3DVariant from "@/components/general/Avatar3DVariant"
 import axios from "axios";
 import useProfileStore from "@/store/profileStore";
+import { Card, CardContent } from "@/components/ui/card";
 
 function InterviewPage() {
 
@@ -278,16 +279,19 @@ function InterviewPage() {
   }, []);
 
   return (
-    <div className="">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b-2 border-zinc-300 dark:border-zinc-700 px-24 h-16">
-        <h3>Interview Analysis</h3>
-        <div className="select-none flex space-x-2 items-center">
+    <div className="page-section">
+      <div className="flex items-center justify-between border-b border-border/70 bg-background/90 px-4 py-3 backdrop-blur-sm sm:px-6 lg:px-8">
+        <h3 className="font-display text-lg font-semibold text-foreground sm:text-xl">Interview Analysis</h3>
+        <div className="flex items-center space-x-2 select-none">
           <Timer loadingNextQuestion={resettingQuestion} currentQuestionIndex={currentQuestionIndex} onReset={handleResetQuestion} />
-          <Button disabled={resettingQuestion} variant="secondary" onClick={handleResetQuestion}>{selectRoundAndTimeLimit(currentQuestionIndex + 1).round === "end" ? "End Interview" : "Next question"}</Button>
+          <Button disabled={resettingQuestion} variant="secondary" onClick={handleResetQuestion}>
+            {selectRoundAndTimeLimit(currentQuestionIndex + 1).round === "end" ? "End Interview" : "Next question"}
+          </Button>
           <Dialog>
             <DialogTrigger>
-              <span className="bg-red-500 text-zinc-100 font-semibold rounded-md py-2 px-4">Leave</span>
+              <span className="inline-flex items-center rounded-full border border-border/70 bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground">
+                Leave
+              </span>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -300,8 +304,8 @@ function InterviewPage() {
                 <Button type="button" variant="destructive" onClick={() => navigate("/dashboard")}>
                   Leave
                 </Button>
-                <DialogClose className="h-full flex justify-center items-center bg-zinc-200 cursor-pointer px-3 rounded-md" asChild>
-                  <span className="text-zinc-900 text-sm">Close</span>
+                <DialogClose className="flex h-full items-center justify-center rounded-md border border-border/70 bg-background px-3" asChild>
+                  <span className="text-sm text-foreground">Close</span>
                 </DialogClose>
               </DialogFooter>
             </DialogContent>
@@ -309,35 +313,35 @@ function InterviewPage() {
         </div>
       </div>
 
-
-      {selectRoundAndTimeLimit(currentQuestionIndex).round === "technical" ?
-        <div className="p-4 rounded-md grid grid-cols-9 gap-4">
-          <div className="col-span-7 h-[80vh]">
-            <div className="min-h-16 px-6 font-semibold bg-blue-200 text-zinc-900 rounded-lg mb-2 overflow-auto py-2 z-10">
-              {resettingQuestion ?
-                <div className="flex flex-col space-y-1">
-                  <p className="animate-pulse w-full h-5 bg-zinc-800 rounded"></p>
-                  <p className="animate-pulse w-9/12 h-5 bg-zinc-800 rounded"></p>
-                </div>
-                :
-                <p className="">
-                  {questionAnswerSets && questionAnswerSets[currentQuestionIndex]?.question || "No question found"}
-                </p>
-              }
-            </div>
-            <CodeEditor addCompileAttempt={({ code, language }: { code: string, language: string }) => {
-              addCodeAttempt(code, language, currentQuestionIndex)
-            }} />
+      {selectRoundAndTimeLimit(currentQuestionIndex).round === "technical" ? (
+        <div className="grid grid-cols-9 gap-4 p-4 lg:p-6">
+          <div className="col-span-9 h-auto lg:col-span-7 lg:h-[80vh]">
+            <Card className="mb-4 overflow-hidden border-border/70">
+              <CardContent className="min-h-16 overflow-auto bg-muted/35 px-4 py-3 sm:px-6">
+                {resettingQuestion ? (
+                  <div className="flex flex-col space-y-1">
+                    <div className="h-4 w-full animate-pulse rounded-full bg-muted" />
+                    <div className="h-4 w-9/12 animate-pulse rounded-full bg-muted" />
+                  </div>
+                ) : (
+                  <p>{questionAnswerSets && questionAnswerSets[currentQuestionIndex]?.question || "No question found"}</p>
+                )}
+              </CardContent>
+            </Card>
+            <CodeEditor
+              addCompileAttempt={({ code, language }: { code: string; language: string }) => {
+                addCodeAttempt(code, language, currentQuestionIndex)
+              }}
+            />
           </div>
-          <div className="col-span-2 space-y-1 p-2">
+          <div className="col-span-9 space-y-4 p-0 lg:col-span-2 lg:space-y-2 lg:p-2">
             <Avatar3D text={questionAnswerSets && questionAnswerSets[currentQuestionIndex].question || "No question found"} />
             <Webcam height={300} width={400} videoHeight={350} videoWidth={450} questionAnswerIndex={currentQuestionIndex} />
-            {/* transcript chatbox */}
             {transcript && (
-              <div className="mt-2 text-sm italic text-gray-600 dark:text-gray-400">
+              <div className="mt-2 rounded-2xl border border-border/70 bg-card/80 p-3 text-sm italic text-muted-foreground">
                 {[...transcript
                   .split(/\r?\n/)
-                  .filter(line => line.trim() !== "")
+                  .filter((line) => line.trim() !== "")
                   .reverse()]
                   .slice(0, 2)
                   .reverse()
@@ -348,47 +352,52 @@ function InterviewPage() {
             )}
           </div>
         </div>
-        :
-        <div className="min-h-[80vh] space-x-2">
-          <div className="min-h-16 px-6 font-semibold bg-blue-200 text-zinc-900 rounded-lg mb-2 overflow-auto py-2 z-10">
-            {resettingQuestion ?
-              <div className="flex flex-col space-y-1">
-                <p className="animate-pulse w-full h-5 bg-zinc-800 rounded"></p>
-                <p className="animate-pulse w-9/12 h-5 bg-zinc-800 rounded"></p>
-              </div>
-              :
-              <p className="">
-                {questionAnswerSets && questionAnswerSets[currentQuestionIndex]?.question || "No question found"}
-              </p>
-            }
-          </div>
-          <div className="flex justify-center items-center">
+      ) : (
+        <div className="min-h-[80vh] space-y-4 p-4 lg:p-6">
+          <Card className="mb-4 overflow-hidden border-border/70">
+            <CardContent className="min-h-16 overflow-auto bg-muted/35 px-4 py-3 sm:px-6">
+              {resettingQuestion ? (
+                <div className="flex flex-col space-y-1">
+                  <div className="h-4 w-full animate-pulse rounded-full bg-muted" />
+                  <div className="h-4 w-9/12 animate-pulse rounded-full bg-muted" />
+                </div>
+              ) : (
+                <p>{questionAnswerSets && questionAnswerSets[currentQuestionIndex]?.question || "No question found"}</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="flex flex-col items-center justify-center gap-4 lg:flex-row">
             <Avatar3DVariant
               text={questionAnswerSets && questionAnswerSets[currentQuestionIndex].question || "No question found"}
             />
             <Webcam height={480} width={480} videoHeight={580} videoWidth={580} questionAnswerIndex={currentQuestionIndex} />
-            {/* transcript chatbox */}
           </div>
+
           {transcript && (
-            <div className="mt-2 text-sm flex justify-center items-center rounded-xl italic text-gray-600 dark:text-gray-400">
+            <div className="mt-4 flex justify-center rounded-2xl border border-border/70 bg-card/80 p-3 text-sm italic text-muted-foreground">
               {[...transcript
                 .split(/\r?\n/)
-                .filter(line => line.trim() !== "")
+                .filter((line) => line.trim() !== "")
                 .reverse()]
                 .slice(0, 2)
                 .reverse()
                 .map((line, index) => (
-                  <p className="w-96" key={index}>{line}</p>
+                  <p className="w-full max-w-2xl" key={index}>
+                    {line}
+                  </p>
                 ))}
             </div>
           )}
         </div>
-      }
-      {resettingQuestion &&
-        <div className="fixed top-16 left-0 w-full h-[0.300rem] loading-bar-container overflow-hidden">
-          <div className="loading-bar h-[0.300rem] w-full bg-gradient-to-r to-blue-600 from-purple-700"></div>
-        </div>}
-    </div >
+      )}
+
+      {resettingQuestion && (
+        <div className="fixed top-16 left-0 h-[0.3rem] w-full overflow-hidden loading-bar-container">
+          <div className="loading-bar h-[0.3rem] w-full bg-gradient-to-r from-primary to-cyan-500" />
+        </div>
+      )}
+    </div>
   );
 }
 

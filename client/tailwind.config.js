@@ -7,6 +7,10 @@ export default {
   darkMode: ["class"],
   theme: {
   	extend: {
+		fontFamily: {
+			sans: ["Plus Jakarta Sans", "sans-serif"],
+			display: ["Space Grotesk", "sans-serif"],
+		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

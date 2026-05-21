@@ -39,18 +39,18 @@ const StreakCircle = ({ interviewSessions }: { interviewSessions: InterviewSessi
     };
 
     return (
-        <Card className="w-7/12 max-w-sm mx-auto p-4 select-none text-center bg-zinc-200 dark:bg-zinc-800 ml-2">
-            <h1 className="text-3xl font-bold rounded-xl py-3  w-full text-center">
-                Streak Track
-            </h1>
-            <div className="space-x-2 pt-4 pb-6">
+        <Card className="surface-panel w-full max-w-sm select-none text-center">
+            <CardHeader className="border-b border-border/60 bg-gradient-to-r from-primary/10 to-transparent">
+                <CardTitle className="text-2xl">Streak Track</CardTitle>
+            </CardHeader>
+            <div className="space-x-2 pb-2 pt-5">
                 {getStreak() >= MAX_STREAK && Array.from({ length: Math.floor(getStreak() / 10) }, (_, index) => (
                     <span key={index} className="text-3xl font-bold rounded-xl py-3  w-full text-center">
                         🔥
                     </span>
                 ))
                 }
-                <span className="text-3xl font-bold rounded-xl py-3 opacity-50 w-full text-center">
+                <span className="text-3xl font-bold rounded-xl py-3 opacity-40 w-full text-center">
                     🔥
                 </span>
             </div>
@@ -60,12 +60,12 @@ const StreakCircle = ({ interviewSessions }: { interviewSessions: InterviewSessi
                     <CardTitle>Streak Tracker</CardTitle>
                 </CardHeader>
             </VisuallyHidden>
-            <CardContent>
+            <CardContent className="pb-6">
                 <div className="relative flex justify-center items-center w-40 h-40 pt-6 pb-4 mx-auto">
                     {/* SVG Circular Progress */}
                     <svg className="absolute w-full h-full rotate-[-90deg]" viewBox="0 0 100 100">
                         {/* Background Circle */}
-                        <circle cx="50" cy="50" r="40" strokeWidth="10" fill="none" className="stroke-gray-300" />
+                        <circle cx="50" cy="50" r="40" strokeWidth="10" fill="none" className="stroke-border" />
                         {/* Streak Progress Circle */}
                         <circle
                             cx="50"
@@ -77,15 +77,15 @@ const StreakCircle = ({ interviewSessions }: { interviewSessions: InterviewSessi
                             strokeDasharray="251.2"
                             strokeDashoffset={251.2 - (getStreak() / MAX_STREAK) * 251.2}
                             strokeLinecap="round"
-                            className="stroke-[#f59e0b] transition-all duration-500 ease-in-out"
+                            className="stroke-amber-500 transition-all duration-500 ease-in-out"
                         />
                     </svg>
 
                     {/* Streak Count in the Center */}
-                    <span className="absolute text-3xl font-bold text-[#f59e0b] ">{getStreak()}</span>
+                    <span className="absolute font-display text-3xl font-bold text-amber-500">{getStreak()}</span>
                 </div>
 
-                <div className="py-6 space-y-2">
+                <div className="space-y-2 py-6 text-sm text-muted-foreground">
                     {interviewSessions &&
                         [...interviewSessions]
                             .sort((a, b) => +new Date(b.startTime) - +new Date(a.startTime)) // Sort in descending order

@@ -33,31 +33,36 @@ function DataVisualization({ analysis }: { analysis: InterviewSessionData[] }) {
   });
 
   return (
-    <Card className="h-50 w-9/12 mx-auto text-center bg-zinc-200/80 dark:bg-[#212121]">
-      <h1 className="text-3xl font-bold my-4 mx-2 rounded-xl py-3 h-15 text-center">
-        Interview Insights
-      </h1>
-      <CardContent>
+    <Card className="surface-panel h-full overflow-hidden">
+      <div className="border-b border-border/60 bg-gradient-to-r from-primary/10 to-transparent px-6 py-5 sm:px-7">
+        <h1 className="font-display text-2xl font-semibold text-foreground">
+          Interview Insights
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Average score trend across your recent sessions.
+        </p>
+      </div>
+      <CardContent className="pt-6">
         <ChartContainer config={chartConfig}>
           <BarChart data={data}>
-            <CartesianGrid vertical={false} stroke="#ddd" />
+            <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
             <XAxis
               dataKey="name"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              stroke="#3b82f6"
+              stroke="hsl(var(--muted-foreground))"
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dashed" />} />
-            <Bar dataKey="averageScore" fill="#3b82f6" radius={4} />
+            <Bar dataKey="averageScore" fill="hsl(var(--primary))" radius={6} />
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none text-blue-500">
+      <CardFooter className="flex-col items-start gap-2 border-t border-border/60 px-6 py-5 text-sm sm:px-7">
+        <div className="flex gap-2 font-medium leading-none text-primary">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
-        <div className="leading-none text-gray-500">
+        <div className="leading-none text-muted-foreground">
           Showing average interview scores
         </div>
       </CardFooter>
