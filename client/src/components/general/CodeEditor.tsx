@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react';
 import LanguageSelector from '@/components/general/LanguageSelector';
 import Output from './Output';
 import { Button } from '../ui/button';
-import { ExecuteCode } from './ExecuteCode';
+import { ExecuteCode } from '../../utils/ExecuteCode';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import useProfileStore from '@/store/profileStore';
@@ -14,7 +14,7 @@ interface CodeEditorProps {
     getValue: () => string;
 }
 
-function CodeEditor() {
+function CodeEditor({ addCompileAttempt }: { addCompileAttempt: ({ language, code }: { language: string, code: string }) => void }) {
     const editorRef = useRef<CodeEditorProps | null>(null);
     const [value, setValue] = useState<string>('');
     const [isTerminalOpen, setIsTerminalOpen] = useState(false);
@@ -35,6 +35,10 @@ function CodeEditor() {
             const { run: result } = await ExecuteCode(language, sourceCode);
             setOutput(result.output);
             setIsError(result.stderr ? true : false);
+            addCompileAttempt({
+                language: language,
+                code: sourceCode,
+            })
         } catch (error) {
             console.error('Error executing code:', error ? error : error);
             toast({
@@ -72,7 +76,7 @@ function CodeEditor() {
             <Editor
                 height="100%"
                 width="100%"
-                theme={profile ? "vs" :"vs-dark"}
+                theme={profile.theme === "light" ? "vs" : "vs-dark"}
                 value={value}
                 onMount={onMountHandler}
                 onChange={(e: string | undefined) => {

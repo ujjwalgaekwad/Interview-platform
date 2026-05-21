@@ -2,13 +2,12 @@ import connectDB from "../db/index"
 import dotenv from "dotenv"
 import { server } from "./app"
 
-const port = process.env.HTTP_PORT || 8000
-
 dotenv.config({
     path: './.env'
 })
 
 connectDB().then(() => {
+    const port = process.env.PORT || process.env.HTTP_PORT || 8000
     server.listen(port, () => {
         console.log(`Server is listening to port ${port}`)
     })

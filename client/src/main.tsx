@@ -1,4 +1,3 @@
-import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 import { ClerkProvider } from '@clerk/clerk-react'
@@ -11,11 +10,11 @@ import AuthLayout from './layouts/AuthLayout'
 import AppLayout from './layouts/AppLayout'
 import DashboardPage from './pages/DashboardPage'
 import RootLayout from './layouts/RootLayout'
-import FeedbackPage from './pages/FeedbackPage'
 import InterviewPage from './pages/InterviewPage'
 import InterviewLayout from './layouts/InterviewLayout'
 import InterviewForm from './components/interview/InterviewForm'
-import AboutPage from './pages/AboutPage'
+import AnalyticsPage from './pages/AnalyticsPage'
+import AboutPage from './pages/Aboutpage'
 
 // Import your Publishable Key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -35,10 +34,7 @@ const router = createBrowserRouter([
         path: "",
         element: <LandingPage />,
       },
-      {
-        path: "about",
-        element: <AboutPage />,
-      },
+
       // protected routes
       {
         path: "dashboard",
@@ -47,6 +43,20 @@ const router = createBrowserRouter([
           {
             path: "",
             element: <DashboardPage />,
+          },
+          {
+            path: "user/form",
+            element: <InterviewForm />,
+          },
+        ]
+      },
+      {
+        path: "aboutus",
+        element: <AppLayout />,
+        children: [
+          {
+            path: "",
+            element: <AboutPage />,
           },
           {
             path: "form",
@@ -64,7 +74,11 @@ const router = createBrowserRouter([
           },
           {
             path: ":id/feedback",
-            element: <FeedbackPage />,
+            element: <AnalyticsPage />,
+          },
+          {
+            path: "sessions/:id",
+            element: <AnalyticsPage />,
           },
         ]
       },
@@ -83,27 +97,26 @@ const router = createBrowserRouter([
           },
         ],
       },
-      // 404 page
       {
-        path: "/",
+        path: "*",
         element: <NotFoundPage />,
-      },
+      }
     ]
-  }
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    {/* auth setup */}
-    <ClerkProvider
-      publishableKey={PUBLISHABLE_KEY}
-      afterSignOutUrl="/"
-      signInForceRedirectUrl="/dashboard"
-      signUpForceRedirectUrl="/dashboard"
-      signInUrl="/auth/signin"
-      signUpUrl="/auth/signup"
-    >
-      <RouterProvider router={router} />
-    </ClerkProvider>
-  </React.StrictMode>,
+  // <React.StrictMode>
+  // {/* auth setup */ }
+  < ClerkProvider
+    publishableKey={PUBLISHABLE_KEY}
+    afterSignOutUrl="/"
+    signInForceRedirectUrl="/dashboard"
+    signUpForceRedirectUrl="/dashboard"
+    signInUrl="/auth/signin"
+    signUpUrl="/auth/signup"
+  >
+    <RouterProvider router={router} />
+  </ ClerkProvider>
+  // </React.StrictMode>,
 )

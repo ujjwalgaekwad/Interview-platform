@@ -6,7 +6,7 @@ function RootLayout() {
 
   const location = useLocation()
 
-  const showHeader = !(location.pathname.includes("/interview"))
+  const showHeader = !(location.pathname.includes("/interview")) && !(location.pathname.includes("/auth"))
 
   return (
     <main className="w-screen min-h-screen overflow-x-hidden bg-zinc-100 dark:bg-zinc-900">

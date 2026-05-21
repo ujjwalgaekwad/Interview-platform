@@ -1,57 +1,73 @@
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import SkillsInput from "./SkillsInput";
-import useInterviewStore from "@/store/interviewStore";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { jobRoleSchema, JobRoleType } from "@/types/InterviewData";
 import { useNavigate } from "react-router-dom";
+import useInterviewStore from "@/store/interviewStore";
 import { useUser } from "@clerk/clerk-react";
 
-// Form Schema
 const formSchema = z.object({
   yearsOfExperience: z
     .number()
     .min(0, "Experience must be a positive number")
     .max(50, "Experience cannot exceed 50 years"),
-  jobRole: z.string(),
+  jobRole: jobRoleSchema,
   skills: z.array(z.string()).nonempty("At least one skill is required"),
 });
 
-function SessionInfoForm({ open, setOpen, jobRole }: { open: boolean; setOpen: (val: boolean) => void; jobRole: string | null }) {
-  const { setCandidate } = useInterviewStore();
-  const navigate = useNavigate();
-  const user = useUser().user;
+export type { formSchema }
+
+function SessionInfoForm({ children, jobRole, skills }: { children: React.ReactNode, jobRole?: JobRoleType, skills?: string[] }) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       yearsOfExperience: 0,
-      jobRole: jobRole || "Frontend Developer",
-      skills: []
-    } 
-  });
+      jobRole: jobRole || "front-end",
+      skills: skills || []
+    }
+  })
+
+  const navigate = useNavigate()
+  const { setCandidate } = useInterviewStore()
+
+  const user = useUser().user
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     setCandidate({
+      id: user?.id || null,
       email: user?.primaryEmailAddress?.emailAddress || null,
       name: user?.username || null,
       yearsOfExperience: values.yearsOfExperience,
-      jobRole: values.jobRole,
-      skills: values.skills
-    });
-    setOpen(false); // Close modal after submission
-    navigate(`/interview/${Date.now()}`);
-  };
+      jobRole: jobRole || values.jobRole,
+      skills: skills || values.skills
+    })
+    navigate(`/interview/${Date.now()}`)
+  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog>
+      <DialogTrigger asChild>
+        {children}
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Start session</DialogTitle>
-          <DialogDescription>Fill the form below to start a new session</DialogDescription>
+          <DialogDescription>
+            Fill the form below to start a new session
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -62,7 +78,18 @@ function SessionInfoForm({ open, setOpen, jobRole }: { open: boolean; setOpen: (
                 <FormItem>
                   <FormLabel>Job Role</FormLabel>
                   <FormControl>
-                    <Input value={jobRole || ""} readOnly />
+                    <Select form="jobRole" value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="">
+                        <SelectValue placeholder="Theme" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {jobRoleSchema.options.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option.charAt(0).toUpperCase() + option.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -95,6 +122,9 @@ function SessionInfoForm({ open, setOpen, jobRole }: { open: boolean; setOpen: (
                   <FormControl>
                     <SkillsInput value={field.value || []} onChange={field.onChange} />
                   </FormControl>
+                  <FormDescription>
+                    Enter at least three skills
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -104,7 +134,7 @@ function SessionInfoForm({ open, setOpen, jobRole }: { open: boolean; setOpen: (
         </Form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default SessionInfoForm;
+export default SessionInfoForm

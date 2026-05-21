@@ -1,6 +1,7 @@
 import { SignedOut, useAuth } from "@clerk/clerk-react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { IoMdClose } from "react-icons/io";
 
 function AuthLayout() {
   const navigate = useNavigate();
@@ -21,6 +22,9 @@ function AuthLayout() {
             src="https://images.unsplash.com/photo-1617195737496-bc30194e3a19?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
             className="absolute inset-0 h-full w-full object-cover opacity-80"
           />
+          <Link to="/" className="fixed top-12 right-12 text-zinc-900 hover:bg-zinc-300 rounded-full p-2 transition-colors duration-300 text-4xl">
+            <IoMdClose />
+          </Link>
 
           <div className="hidden lg:relative lg:block lg:p-12">
             <a className="block text-white" href="#">

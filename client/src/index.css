@@ -1,6 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* index.css or App.css */
+html,
+body {
+  overflow-x: hidden;
+}
 
 @layer base {
   :root {
@@ -24,8 +29,14 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 248 90% 66%;
     --radius: 0.75rem;
+    --color-primary: 23, 57%, 60%;
+    --chart-1: 23, 57%, 60%;
+    --chart-2: 70, 100%, 86%;
+    --chart-3: 70, 100%, 86%;
+    --chart-4: 70, 100%, 86%;
+    --chart-5: 70, 100%, 86%;
   }
-
+  
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -46,9 +57,14 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 248 90% 66%;
+    --color-primary: 23, 57%, 60%;
+    --chart-1: 23, 57%, 60%;
+    --chart-2: 70, 100%, 86%;
+    --chart-3: 70, 100%, 86%;
+    --chart-4: 70, 100%, 86%;
+    --chart-5: 70, 100%, 86%;
   }
 }
-
 
 @layer base {
   * {
@@ -58,12 +74,47 @@
     @apply bg-background text-foreground;
   }
 
+  .loading-bar {
+    animation: loading 1.5s linear infinite;
+  }
+
+  .scroll2::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .scroll2::-webkit-scrollbar-thumb {
+    background: #666;
+  }
+
+  @keyframes loading {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
   .animate-fadeIn {
     animation: fadeIn 0.3s ease-in-out;
   }
-  
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

@@ -1,7 +1,4 @@
-import {
-  AboutCandidateType,
-  QuestionAnswerType,
-} from "@/types/InterviewData";
+import { AboutCandidateType, QuestionAnswerType } from "@/types/InterviewData";
 import { create } from "zustand";
 
 interface interviewState {
@@ -9,6 +6,7 @@ interface interviewState {
   candidate: AboutCandidateType | null;
   updateAnswer: (answer: string, index: number) => void;
   addQuestionAnswerSet: (questionAnswerSet: QuestionAnswerType) => void;
+  addCodeAttempt: (code: string, language: string, index: number) => void;
   setQuestionAnswerSets: (
     questionAnswerSets: QuestionAnswerType[] | null
   ) => void;
@@ -31,6 +29,18 @@ const useInterviewStore = create<interviewState>((set) => ({
         questionAnswerSet,
       ],
     })),
+  addCodeAttempt: (code, language, index) => {
+    set((state) => ({
+      questionAnswerSets: state.questionAnswerSets?.map((q, i) =>
+        i === index
+          ? {
+              ...q,
+              code: [...(q.code || []), { code, language }],
+            }
+          : q
+      ),
+    }));
+  },
   setQuestionAnswerSets: (questionAnswerSets) => set({ questionAnswerSets }),
   setCandidate: (candidate) => set({ candidate }),
 }));

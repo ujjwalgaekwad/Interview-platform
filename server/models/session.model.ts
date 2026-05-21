@@ -32,6 +32,18 @@ const sessionSchema = new mongoose.Schema({
       {
         question: String,
         answer: String,
+        answerReview: {
+          type: String,
+          default: "",
+        },
+        correctAnswer: {
+          type: String,
+          default: "",
+        },
+        score: {
+          type: Number,
+          default: 0,
+        },
         timeLimit: Number,
         round: String,
         startTime: Number,

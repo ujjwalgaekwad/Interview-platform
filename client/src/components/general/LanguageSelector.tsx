@@ -6,7 +6,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import { languages } from "./Languages";
+import { languages } from "../../utils/Languages";
 
 interface LanguageSelectorProps {
     language: string;

@@ -1,7 +1,12 @@
+import dotenv from "dotenv";
 import http from "http";
 import express from "express";
 import cors from "cors";
 import { Server } from "socket.io";
+
+dotenv.config({
+  path: "./.env",
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -42,6 +47,9 @@ type RoundType = "aptitude" | "technical" | "behavioral" | "system-design";
 type QuestionSchema = {
   question: string;
   answer: string;
+  answerReview: string;
+  correctAnswer: string;
+  score: number;
   timeLimit: number;
   round: RoundType;
   startTime: number;
@@ -49,6 +57,12 @@ type QuestionSchema = {
   faceExpressions: FaceExpression[];
   gazeTracking: GazeTracking[];
   questionAnswerIndex: number;
+};
+
+type InterviewEvaluation = {
+  answerReview: string;
+  score: number;
+  correctAnswer: string;
 };
 
 type InterviewSession = {
@@ -112,7 +126,13 @@ io.on("connection", (socket) => {
 
   const processAnalyticsData = () => {
     try {
-      
+      const session = runningInterviewSession.get(socket.id);
+
+      if (!session) {
+        throw new Error("Session not found");
+      }
+
+      return session;
     } catch (error) {
       throw error
     }
@@ -135,6 +155,9 @@ io.on("connection", (socket) => {
         const newQuestion: QuestionSchema = {
           question: data.question || "",
           answer: data.answer || "",
+          answerReview: "",
+          correctAnswer: "",
+          score: 0,
           timeLimit: data.timeLimit || 60,
           round: data.round || "aptitude",
           startTime: Date.now(),
@@ -171,6 +194,39 @@ io.on("connection", (socket) => {
 
         console.log(`Updated Question Data:`, session.questions);
       }
+    } catch (error) {
+      handleSocketError(socket, error);
+    }
+  });
+
+  socket.on("interview-evaluation", (data: InterviewEvaluation[]) => {
+    try {
+      if (!runningInterviewSession.has(socket.id)) {
+        throw new Error("Session not found");
+      }
+
+      const session = runningInterviewSession.get(socket.id);
+
+      if (!session) {
+        throw new Error("Session not found");
+      }
+
+      session.questions = session.questions.map((question, index) => {
+        const evaluation = data[index];
+
+        if (!evaluation) {
+          return question;
+        }
+
+        return {
+          ...question,
+          answerReview: evaluation.answerReview,
+          correctAnswer: evaluation.correctAnswer,
+          score: evaluation.score,
+        };
+      });
+
+      runningInterviewSession.set(socket.id, session);
     } catch (error) {
       handleSocketError(socket, error);
     }
@@ -214,7 +270,7 @@ io.on("connection", (socket) => {
         session.endTime = Date.now();
         session.status = "completed";
 
-        socket.emit("interview-analytics", processAnalyticsData);
+        socket.emit("interview-analytics", processAnalyticsData());
       }
     } catch (error) {
       handleSocketError(socket, error);
